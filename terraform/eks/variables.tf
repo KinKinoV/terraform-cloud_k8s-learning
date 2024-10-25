@@ -9,3 +9,8 @@ variable "cidr" {
   type        = string
   default     = "10.0.0.0/16"
 }
+
+variable "zone_name" {
+  description = "Name for the Route53 hosted zone"
+  type        = string
+}
