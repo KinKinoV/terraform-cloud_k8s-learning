@@ -14,6 +14,7 @@ module "irsa-aws-lb-controller" {
   role_name                     = "AmazonEKSLoadBalancerControllerRole"
   provider_url                  = var.oidc_provider
   role_policy_arns              = [aws_iam_policy.aws-lb-controller.arn]
+  oidc_fully_qualified_audiences = [ "sts.awsamazon.com" ]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
 }
 
@@ -29,6 +30,8 @@ resource "helm_release" "aws-lb-controller" {
 serviceAccount:
   create: true
   name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: ${module.irsa-aws-lb-controller.iam_role_arn}
 clusterName: ${var.eks_name}
   EOT
   ]
