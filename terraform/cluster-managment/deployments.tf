@@ -1,31 +1,25 @@
-resource "kubernetes_deployment" "helloweb" {
+resource "kubernetes_deployment" "google_echoserver" {
   metadata {
-    name = "helloweb"
-    labels = {
-      app = "hello"
-    }
-    namespace = kubernetes_namespace.hello-app.metadata[0].name
+    name = "echoserver"
   }
   spec {
-    replicas = 2
+    replicas = 1
     selector {
       match_labels = {
-        app  = "hello"
-        tier = "web"
+        app = "echoserver"
       }
     }
     template {
       metadata {
         labels = {
-          app  = "hello"
-          tier = "web"
+          app = "echoserver"
         }
       }
       spec {
         container {
-          name              = "hello-app"
-          image             = "paulbouwer/hello-kubernetes:1.10.1"
-          image_pull_policy = "IfNotPresent"
+          image             = "gcr.io/google_containers/echoserver:1.4"
+          image_pull_policy = "Always"
+          name              = "echoserver"
           port {
             container_port = 8080
           }
@@ -35,58 +29,53 @@ resource "kubernetes_deployment" "helloweb" {
   }
 }
 
-resource "kubernetes_service" "helloapp_service" {
+resource "kubernetes_service" "google_echoserver" {
   metadata {
-    name = "hello-app-svc"
-    namespace = kubernetes_namespace.hello-app.metadata[0].name
+    name = "echoserver"
   }
   spec {
     port {
-      port        = 443
-      protocol    = "TCP"
+      port        = 80
       target_port = 8080
+      protocol    = "TCP"
     }
+    type = "NodePort"
     selector = {
-      app  = "hello"
-      tier = "web"
+      app = "echoserver"
     }
-    type = "ClusterIP"
   }
 }
 
-resource "kubernetes_ingress_v1" "helloapp_ingress" {
+resource "kubernetes_ingress_v1" "google_echoserver" {
   metadata {
-    name      = "hello-app-ingress"
-    namespace = kubernetes_namespace.hello-app.metadata[0].name
     annotations = {
-      "cert-manager.io/cluster-issuer"                 = kubernetes_manifest.cluster-issuer.manifest.metadata.name
-      "alb.ingress.kubernetes.io/scheme"               = "internet-facing"
-      "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\": 80}, {\"HTTPS\": 443}]"
-      "alb.ingress.kubernetes.io/healthcheck-path"     = "/"
-      "alb.ingress.kubernetes.io/healthcheck-port"     = "traffic-port"
-      "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
+      "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
+      "external-dns.alpha.kubernetes.io/hostname" = "echoserver.kinkinov.com"
+      "cert-manager.io/cluster-issuer"            = "letsencrypt-test"
     }
+    name = "echoserver"
   }
   spec {
-    tls {
-      hosts       = ["helloapp.kinkinov.com"]
-      secret_name = "hello-app-tls"
-    }
+    ingress_class_name = "alb"
     rule {
-      host = "helloapp.kinkinov.com"
       http {
         path {
           path = "/"
           backend {
             service {
-              name = "hello-app-svc"
+              name = "echoserver"
               port {
-                number = 443
+                number = 80
               }
             }
           }
+          path_type = "Prefix"
         }
       }
+    }
+    tls {
+      hosts       = ["echoserver.kinkinov.com"]
+      secret_name = "echoserver-secret"
     }
   }
 }
