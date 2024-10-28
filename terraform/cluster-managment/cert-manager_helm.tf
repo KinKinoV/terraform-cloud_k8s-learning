@@ -1,14 +1,3 @@
-resource "helm_release" "cert-manager" {
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  namespace  = kubernetes_namespace.cert-manager.metadata[0].name
-
-  values = [
-    file("${path.module}/cert-manager_values.yaml")
-  ]
-}
-
 # Required IAM policy and IRSA for cert-manager to interact with Route53
 resource "aws_iam_policy" "cert-manager-issuer-r53" {
   name        = "cert-manager-acme-dns01-route53"
@@ -26,73 +15,52 @@ module "irsa-cert-manager" {
   role_name                     = "cert-manager-acme-dns01-route53"
   provider_url                  = var.oidc_provider
   role_policy_arns              = [aws_iam_policy.cert-manager-issuer-r53.arn]
+  oidc_fully_qualified_audiences = [ "sts.awsamazon.com" ]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${kubernetes_namespace.cert-manager.metadata[0].name}:cert-manager-acme-dns01-route53"]
 }
 
-# cert-manager ServiceAccount and permissions in EKS cluster to use with Route53
-resource "kubernetes_service_account" "cert-manager-acme-dns01-route53" {
+# Installing Cert Manager
+resource "kubernetes_namespace" "cert-manager" {
   metadata {
-    name      = "cert-manager-acme-dns01-route53"
-    namespace = kubernetes_namespace.cert-manager.metadata[0].name
-    annotations = {
-      "eks.amazonaws.com/role-arn" = module.irsa-cert-manager.iam_role_arn
-    }
+    name = "cert-manager"
   }
 }
 
-resource "kubernetes_role" "cert-manager-acme-dns01-route53-tokenrequest" {
-  metadata {
-    name      = "cert-manager-acme-dns01-route53-tokenrequest"
-    namespace = kubernetes_namespace.cert-manager.metadata[0].name
-  }
-  rule {
-    api_groups     = [""]
-    resources      = ["serviceaccounts/token"]
-    resource_names = ["cert-manager-acme-dns01-route53"]
-    verbs          = ["create"]
-  }
-}
+resource "helm_release" "cert-manager" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  namespace  = kubernetes_namespace.cert-manager.metadata[0].name
 
-resource "kubernetes_role_binding" "cert-manager-acme-dns01-route53-tokenrequest" {
-  metadata {
-    name      = "cert-manager-acme-dns01-route53-tokenrequest"
-    namespace = kubernetes_namespace.cert-manager.metadata[0].name
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.cert-manager-acme-dns01-route53.metadata[0].name
-    namespace = kubernetes_namespace.cert-manager.metadata[0].name
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "Role"
-    name      = kubernetes_role.cert-manager-acme-dns01-route53-tokenrequest.metadata[0].name
-  }
-}
-
-# Creating ClusterIssuer using manifest
-resource "kubernetes_manifest" "cluster-issuer" {
-  manifest = yamldecode(<<EOT
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-test
-spec:
-  acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: ${var.clusterIssuer_email}
-    privateKeySecretRef:
-      name: letsencrypt-test
-    solvers:
-    - dns01:
-        route53:
-          region: ${var.region}
-          hostedZoneID: "kinkinov.com"
-          role: ${module.irsa-cert-manager.iam_role_arn}
-          auth:
-            kubernetes:
-              serviceAccountRef:
-                name: ${kubernetes_service_account.cert-manager-acme-dns01-route53.metadata[0].name}
+  values = [<<EOT
+crds:
+  enabled: true
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: ${module.irsa-cert-manager.iam_role_arn}
   EOT
-  )
+  ]
 }
+
+# Uncomment only after applying cert-manager helm release!!!
+# # Creating ClusterIssuer using manifest
+# resource "kubernetes_manifest" "cluster-issuer" {
+#   manifest = yamldecode(<<EOT
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: letsencrypt-test
+# spec:
+#   acme:
+#     server: https://acme-staging-v02.api.letsencrypt.org/directory
+#     email: ${var.clusterIssuer_email}
+#     privateKeySecretRef:
+#       name: letsencrypt-test
+#     solvers:
+#     - dns01:
+#         route53: {}
+#   EOT
+#   )
+
+#   depends_on = [helm_release.cert-manager]
+# }
