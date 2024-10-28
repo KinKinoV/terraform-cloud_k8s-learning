@@ -62,6 +62,7 @@ module "irsa-ebs-csi" {
   role_name                     = "AmazonEKSTFEBSCSIRole-${module.eks.cluster_name}"
   provider_url                  = module.eks.oidc_provider
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
+  oidc_fully_qualified_audiences = [ "sts.awsamazon.com" ]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
 
@@ -73,6 +74,7 @@ module "irsa-vpc-cni" {
   role_name                     = "AmazonEKS_VPC_CNI_Role-${module.eks.cluster_name}"
   provider_url                  = module.eks.oidc_provider
   role_policy_arns              = [data.aws_iam_policy.vpc_cni_policy.arn]
+  oidc_fully_qualified_audiences = [ "sts.awsamazon.com" ]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:aws-node"]
 }
 
@@ -130,7 +132,7 @@ module "eks_hosted-zone" {
 
   zones = {
     "${var.zone_name}" = {
-      comment = "Hosted zone for application deployed in EKS"
+      comment = "Hosted zone for applications EKS"
     }
   }
 }
