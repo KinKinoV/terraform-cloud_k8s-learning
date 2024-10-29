@@ -15,8 +15,7 @@ module "irsa-cert-manager" {
   role_name                     = "cert-manager-acme-dns01-route53"
   provider_url                  = var.oidc_provider
   role_policy_arns              = [aws_iam_policy.cert-manager-issuer-r53.arn]
-  oidc_fully_qualified_audiences = [ "sts.awsamazon.com" ]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:${kubernetes_namespace.cert-manager.metadata[0].name}:cert-manager-acme-dns01-route53"]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${kubernetes_namespace.cert-manager.metadata[0].name}:cert-manager"]
 }
 
 # Installing Cert Manager
@@ -40,9 +39,12 @@ serviceAccount:
     eks.amazonaws.com/role-arn: ${module.irsa-cert-manager.iam_role_arn}
   EOT
   ]
+
+  depends_on = [ helm_release.aws-lb-controller, helm_release.external-dns ]
 }
 
-# Uncomment only after applying cert-manager helm release!!!
+#Uncomment only after applying cert-manager helm release!!!
+
 # # Creating ClusterIssuer using manifest
 # resource "kubernetes_manifest" "cluster-issuer" {
 #   manifest = yamldecode(<<EOT
