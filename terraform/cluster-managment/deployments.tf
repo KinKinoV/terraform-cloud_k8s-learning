@@ -46,36 +46,39 @@ resource "kubernetes_service" "google_echoserver" {
   }
 }
 
-resource "kubernetes_ingress_v1" "google_echoserver" {
-  metadata {
-    annotations = {
-      "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
-      "external-dns.alpha.kubernetes.io/hostname" = "echoserver.kinkinov.com"
-      "cert-manager.io/cluster-issuer"            = "letsencrypt-test"
-    }
-    name = "echoserver"
-  }
-  spec {
-    ingress_class_name = "alb"
-    rule {
-      http {
-        path {
-          path = "/"
-          backend {
-            service {
-              name = "echoserver"
-              port {
-                number = 80
-              }
-            }
-          }
-          path_type = "Prefix"
-        }
-      }
-    }
-    tls {
-      hosts       = ["echoserver.kinkinov.com"]
-      secret_name = "echoserver-secret"
-    }
-  }
-}
+# resource "kubernetes_ingress_v1" "google_echoserver" {
+#   metadata {
+#     annotations = {
+#       "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
+#       "alb.ingress.kubernetes.io/ssl-redirect"    = "443"
+#       "alb.ingress.kubernetes.io/listen-ports"    = "[{\"HTTPS\": 80}, {\"HTTPS\": 443}]"
+#       "external-dns.alpha.kubernetes.io/hostname" = "echoserver.kinkinov.com"
+#       "cert-manager.io/cluster-issuer"            = "letsencrypt-test"
+#     }
+#     name = "echoserver"
+#   }
+#   spec {
+#     ingress_class_name = "alb"
+#     rule {
+#       http {
+#         path {
+#           path = "/"
+#           backend {
+#             service {
+#               name = "echoserver"
+#               port {
+#                 number = 80
+#               }
+#             }
+#           }
+#           path_type = "Prefix"
+#         }
+#       }
+#     }
+#     tls {
+#       hosts       = ["echoserver.kinkinov.com"]
+#       secret_name = "echoserver-secret"
+#     }
+#   }
+#   depends_on = [ kubernetes_manifest.cluster-issuer, helm_release.aws-lb-controller ]
+# }
