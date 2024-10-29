@@ -14,7 +14,6 @@ module "irsa-aws-lb-controller" {
   role_name                     = "AmazonEKSLoadBalancerControllerRole"
   provider_url                  = var.oidc_provider
   role_policy_arns              = [aws_iam_policy.aws-lb-controller.arn]
-  oidc_fully_qualified_audiences = [ "sts.awsamazon.com" ]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
 }
 
