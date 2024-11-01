@@ -25,6 +25,14 @@ aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terr
     3. Apply everything once again
 
 ### Azure
+1. Deploy AKS cluster using [/azure/aks/](/azure/aks/) Terraform files
+2. After deployment finishes use this command:
+```bash
+# This command outputs "kube_config" output values into the temp aks_config file
+echo "$(terraform output kube_config)" > ./aks_config
+```
+3. Check file for ASCII EOT characters, if they are present - remove them
+4. Copy or move contents of the `aks_config` file to your default kubeconfig file (`~/.kube/config`) or set `KUBECONFIG` env variable with path to `aks_config` file. Now you should be able to check AKS deployment using `kubectl get nodes` or other similar commands.
 
 ## How to Destroy
 
@@ -34,3 +42,7 @@ To Destroy infrastructure:
 2. Destroy managed EKS cluster resources in `eks` folder.
 
 ### Azure
+
+To Destroy infrastructure:
+1. Destroy `aks` resources in corresponding folder.
+2. Delete contents of the `~/.kube/config` file or delete custom config file from your machine (should be at `/path/to/project/terraform-cloud_k8s-learning/azure/aks/aks_config`).
