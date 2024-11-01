@@ -2,9 +2,6 @@ output "azs" {
   value = data.aws_availability_zones.available.names
 }
 
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
 output "cluster_endpoint" {
   description = "Endpoint for EKS control plane"
   value       = module.eks.cluster_endpoint

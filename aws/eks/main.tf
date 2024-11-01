@@ -3,6 +3,8 @@ provider "aws" {
   profile = "default"
 }
 
+# This code was created by following this tutorial: https://developer.hashicorp.com/terraform/tutorials/kubernetes/eks
+
 # Filter out local zones, which are not currently supported 
 # with managed node groups
 data "aws_availability_zones" "available" {
@@ -21,6 +23,10 @@ resource "random_string" "suffix" {
   length  = 8
   special = false
 }
+
+#####################################################################################
+#                                      Network                                      #
+#####################################################################################
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -45,6 +51,22 @@ module "vpc" {
     "kubernetes.io/role/internal-elb" = 1
   }
 }
+
+module "eks_hosted-zone" {
+  source  = "terraform-aws-modules/route53/aws//modules/zones"
+  version = "4.1.0"
+
+  zones = {
+    "${var.zone_name}" = {
+      comment = "Hosted zone for applications EKS"
+    }
+  }
+}
+
+
+#####################################################################################
+#                                         IAM                                       #
+#####################################################################################
 
 data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
@@ -75,6 +97,10 @@ module "irsa-vpc-cni" {
   role_policy_arns               = [data.aws_iam_policy.vpc_cni_policy.arn]
   oidc_fully_qualified_subjects  = ["system:serviceaccount:kube-system:aws-node"]
 }
+
+#####################################################################################
+#                                       EKS                                         #
+#####################################################################################
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -120,17 +146,6 @@ module "eks" {
       min_size     = 1
       max_size     = 2
       desired_size = 1
-    }
-  }
-}
-
-module "eks_hosted-zone" {
-  source  = "terraform-aws-modules/route53/aws//modules/zones"
-  version = "4.1.0"
-
-  zones = {
-    "${var.zone_name}" = {
-      comment = "Hosted zone for applications EKS"
     }
   }
 }
