@@ -1,10 +1,38 @@
+#####################################################################################
+#                                     SSH key                                       #
+#####################################################################################
+
 output "key_data" {
   value = azapi_resource_action.ssh_public_key_gen.output.publicKey
 }
 
+#####################################################################################
+#                                  Resource Group                                   #
+#####################################################################################
+
 output "resource_group_name" {
   value = azurerm_resource_group.this.name
 }
+
+output "resource_group_location" {
+  value = azurerm_resource_group.this.location
+}
+
+#####################################################################################
+#                                    Azure DNS                                      #
+#####################################################################################
+
+output "dns_zone_name" {
+  value = azurerm_dns_zone.this.name
+}
+
+output "dns_zone_nameservers" {
+  value = azurerm_dns_zone.this.name_servers
+}
+
+#####################################################################################
+#                                    Kubernetes                                     #
+#####################################################################################
 
 output "kubernetes_cluster_name" {
   value = azurerm_kubernetes_cluster.this.name

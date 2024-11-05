@@ -1,4 +1,6 @@
-# This code was created by following the tutorial here https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-terraform?pivots=development-environment-azure-cli
+# This code was created by following next tutorials:
+# 1) https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-terraform?pivots=development-environment-azure-cli
+# 2) https://learn.microsoft.com/en-us/azure/dns/dns-get-started-terraform?tabs=azure-cli
 
 provider "azurerm" {
   subscription_id = var.subscription_id
@@ -61,6 +63,9 @@ resource "azurerm_kubernetes_cluster" "this" {
   resource_group_name = azurerm_resource_group.this.name
   dns_prefix          = random_pet.aks_dns_prefix.id
 
+  oidc_issuer_enabled       = true
+  workload_identity_enabled = true
+
   identity {
     type = "SystemAssigned"
   }
@@ -83,4 +88,13 @@ resource "azurerm_kubernetes_cluster" "this" {
     network_plugin    = "kubenet"
     load_balancer_sku = "standard"
   }
+}
+
+#####################################################################################
+#                                   Azure DNS                                       #
+#####################################################################################
+
+resource "azurerm_dns_zone" "this" {
+  name                = var.dns_zone_name
+  resource_group_name = azurerm_resource_group.this.name
 }
