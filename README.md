@@ -9,6 +9,7 @@ Table of Contents:
 2. [How to Destroy](#how-to-destroy)
     1. [AWS](#aws-1)
     2. [Azure](#azure-1)
+3. [Usefull Links](#usefull-links)
 
 ## How to Deploy
 
@@ -46,3 +47,9 @@ To Destroy infrastructure:
 To Destroy infrastructure:
 1. Destroy `aks` resources in corresponding folder.
 2. Delete contents of the `~/.kube/config` file or delete custom config file from your machine (should be at `/path/to/project/terraform-cloud_k8s-learning/azure/aks/aks_config`).
+
+
+# Usefull Links
+
+1. [Workload Identity in AKS with Terraform](https://surajblog.medium.com/workload-identity-in-aks-with-terraform-9d6866b2bfa2)
+2. [Setting up ExternalDNS for Services on Azure](https://kubernetes-sigs.github.io/external-dns/v0.14.2/tutorials/azure/#assign-a-role-to-the-managed-identity)
