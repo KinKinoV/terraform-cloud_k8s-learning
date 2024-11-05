@@ -12,6 +12,7 @@ variable "rg_name_prefix" {
 variable "rg_location" {
   description = "Location for the Resource Group to be created"
   type        = string
+  default     = "northeurope"
 }
 
 variable "node_count" {
@@ -24,4 +25,9 @@ variable "node_username" {
   description = "Admin username for the nodes' OS"
   type        = string
   default     = "azureadmin"
+}
+
+variable "dns_zone_name" {
+  description = "Name for the Azure DNS zone"
+  type        = string
 }
