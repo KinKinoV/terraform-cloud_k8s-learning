@@ -31,9 +31,6 @@ resource "kubernetes_deployment" "nginx" {
 resource "kubernetes_service" "nginx" {
   metadata {
     name = "nginx-svc"
-    annotations = {
-      "external-dns.alpha.kubernetes.io/hostname" = "server.kinkinov.com"
-    }
   }
   spec {
     port {
@@ -44,6 +41,40 @@ resource "kubernetes_service" "nginx" {
     selector = {
       app = "nginx"
     }
-    type = "LoadBalancer"
+    type = "ClusterIP"
+  }
+}
+
+resource "kubernetes_ingress_v1" "nginx-ingress" {
+  metadata {
+    name = "nginx-ingress"
+    annotations = {
+      "external-dns.alpha.kubernetes.io/hostname" = "server.kinkinov.com"
+      "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
+    }
+  }
+  spec {
+    ingress_class_name = "azure-application-gateway"
+    tls {
+      hosts = [ "server.kinkinov.com" ]
+      secret_name = "nginx-ingress-secret"
+    }
+    rule {
+      host = "server.kinkinov.com"
+      http {
+        path {
+          path = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "nginx-svc"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
