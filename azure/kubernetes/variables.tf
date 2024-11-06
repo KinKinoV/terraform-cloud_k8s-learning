@@ -10,6 +10,11 @@ variable "tenant_id" {
   sensitive   = true
 }
 
+variable "acme_email" {
+  description = "Email to use in ACME registration"
+  type = string
+}
+
 variable "aks_name" {
   description = "Name of the required AKS cluster to manage"
   type        = string
