@@ -84,6 +84,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
+  ingress_application_gateway {
+    subnet_cidr = "10.225.0.0/16"
+  }
+
   network_profile {
     network_plugin    = "kubenet"
     load_balancer_sku = "standard"
