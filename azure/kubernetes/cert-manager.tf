@@ -51,23 +51,23 @@ podLabels:
   ]
 }
 
-resource "kubernetes_manifest" "cluster-issuer" {
-  depends_on = [ helm_release.cert-manager ]
-  manifest = yamldecode(<<EOF
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: ${var.acme_email}
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          ingressClassName: azure-application-gateway
-  EOF
-  )
-}
+# resource "kubernetes_manifest" "cluster-issuer" {
+#   depends_on = [ helm_release.cert-manager ]
+#   manifest = yamldecode(<<EOF
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: letsencrypt-prod
+# spec:
+#   acme:
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     email: ${var.acme_email}
+#     privateKeySecretRef:
+#       name: letsencrypt-prod
+#     solvers:
+#     - http01:
+#         ingress:
+#           ingressClassName: azure-application-gateway
+#   EOF
+#   )
+# }

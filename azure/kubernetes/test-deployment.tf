@@ -45,36 +45,36 @@ resource "kubernetes_service" "nginx" {
   }
 }
 
-resource "kubernetes_ingress_v1" "nginx-ingress" {
-  metadata {
-    name = "nginx-ingress"
-    annotations = {
-      "external-dns.alpha.kubernetes.io/hostname" = "server.kinkinov.com"
-      "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
-    }
-  }
-  spec {
-    ingress_class_name = "azure-application-gateway"
-    tls {
-      hosts = [ "server.kinkinov.com" ]
-      secret_name = "nginx-ingress-secret"
-    }
-    rule {
-      host = "server.kinkinov.com"
-      http {
-        path {
-          path = "/"
-          path_type = "Prefix"
-          backend {
-            service {
-              name = "nginx-svc"
-              port {
-                number = 80
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+# resource "kubernetes_ingress_v1" "nginx-ingress" {
+#   metadata {
+#     name = "nginx-ingress"
+#     annotations = {
+#       "external-dns.alpha.kubernetes.io/hostname" = "server.${var.dns_zone_name}"
+#       "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
+#     }
+#   }
+#   spec {
+#     ingress_class_name = "azure-application-gateway"
+#     tls {
+#       hosts = [ "server.${var.dns_zone_name}" ]
+#       secret_name = "nginx-ingress-secret"
+#     }
+#     rule {
+#       host = "server.${var.dns_zone_name}"
+#       http {
+#         path {
+#           path = "/"
+#           path_type = "Prefix"
+#           backend {
+#             service {
+#               name = "nginx-svc"
+#               port {
+#                 number = 80
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
