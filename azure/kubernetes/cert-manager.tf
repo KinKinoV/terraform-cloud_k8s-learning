@@ -52,7 +52,7 @@ podLabels:
 }
 
 # resource "kubernetes_manifest" "cluster-issuer" {
-#   depends_on = [ helm_release.cert-manager ]
+#   depends_on = [helm_release.cert-manager]
 #   manifest = yamldecode(<<EOF
 # apiVersion: cert-manager.io/v1
 # kind: ClusterIssuer
@@ -68,6 +68,34 @@ podLabels:
 #     - http01:
 #         ingress:
 #           ingressClassName: azure-application-gateway
+#   EOF
+#   )
+# }
+
+# Uncomment cluster-issuer-dns instead of the previous one if you wish to have
+# wildcard certificates (eg.: *.example.com)
+# resource "kubernetes_manifest" "cluster-issuer-dns" {
+#   depends_on = [helm_release.cert-manager]
+#   manifest = yamldecode(<<EOF
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: letsencrypt-dns
+# spec:
+#   acme:
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     email: ${var.acme_email}
+#     privateKeySecretRef:
+#       name: letsencrypt-prod
+#     solvers:
+#     - dns01:
+#         azureDNS:
+#           hostedZoneName: ${var.dns_zone_name}
+#           resourceGroupName: ${var.rg_name}
+#           subscriptionID: ${var.subscription_id}
+#           environment: AzurePublicCloud
+#           managedIdentity:
+#             clientID: ${azurerm_user_assigned_identity.cert-manager.client_id}
 #   EOF
 #   )
 # }

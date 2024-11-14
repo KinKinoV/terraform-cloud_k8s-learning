@@ -41,7 +41,7 @@ resource "azurerm_role_assignment" "external-dns-rg-reader" {
 
 resource "kubernetes_secret" "external-dns-azure-cred" {
   metadata {
-    name = "external-dns-azure"
+    name      = "external-dns-azure"
     namespace = kubernetes_namespace.external-dns.metadata[0].name
   }
   type = "Opaque"
@@ -58,7 +58,7 @@ resource "kubernetes_secret" "external-dns-azure-cred" {
 }
 
 resource "helm_release" "external-dns" {
-  depends_on = [ kubernetes_secret.external-dns-azure-cred ]
+  depends_on = [kubernetes_secret.external-dns-azure-cred]
   name       = "external-dns"
   repository = "https://kubernetes-sigs.github.io/external-dns/"
   chart      = "external-dns"
@@ -80,7 +80,7 @@ podLabels:
 extraVolumes:
   - name: azure-config-file
     secret:
-      secretName: external-dns-azure
+      secretName: ${kubernetes_secret.external-dns-azure-cred.metadata[0].name}
 extraVolumeMounts:
   - name: azure-config-file
     mountPath: /etc/kubernetes
@@ -88,6 +88,11 @@ extraVolumeMounts:
 
 provider:
   name: azure
+
+sources:
+  - service
+  - ingress
+  - istio-gateway
   EOT
   ]
 }

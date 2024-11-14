@@ -12,7 +12,7 @@ variable "tenant_id" {
 
 variable "acme_email" {
   description = "Email to use in ACME registration"
-  type = string
+  type        = string
 }
 
 variable "aks_name" {
