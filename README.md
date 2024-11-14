@@ -36,7 +36,7 @@ echo "$(terraform output kube_config)" > ./aks_config
 4. Copy or move contents of the `aks_config` file to your default kubeconfig file (`~/.kube/config`) or set `KUBECONFIG` env variable with path to `aks_config` file. Now you should be able to check AKS deployment using `kubectl get nodes` or other similar commands.
 5. Take values of outputs `kubernetes_cluster_name`, `dns_zone_name`, `resource_group_name` and use them as `aks_name`, `dns_zone_name` and `rg_name` in `values.tfvars` at [azure/kubernetes/](/azure/kubernetes/) directory.
 6. Fill out other required variables and then deploy infrastructure in [azure/kubernetes/](/azure/kubernetes/) directory.
-    - After deploying for the first time, go uncomment [ClusterIssuer](/azure/kubernetes/cert-manager.tf#L54) in `/azure/kubernetes/cert-manager.tf` and [Ingress](/azure/kubernetes/test-deployment.tf#L48) at `/azure/kubernetes/test-deployment.tf` and deploy once again
+    - After deploying for the first time, go uncomment [ClusterIssuer](/azure/kubernetes/cert-manager.tf#L54) in `/azure/kubernetes/cert-manager.tf` and manifests at [`/azure/kubernetes/test-deployment.tf`](/azure/kubernetes/test-deployment.tf) and deploy once again
 7. Now you should be able to access simple nginx server deployment at `server.<dns_zone_name>` over HTTPS.
 
 ## How to Destroy
@@ -50,7 +50,7 @@ To Destroy infrastructure:
 ### Azure
 
 To Destroy infrastructure:
-1. Destroy `kubernetes` resources in corrsponding folder.
+1. Destroy `kubernetes` resources in corresponding folder in reverse order.
 2. Destroy `aks` resources in corresponding folder.
 3. Delete contents of the `~/.kube/config` file or delete custom config file from your machine (should be at `/path/to/project/terraform-cloud_k8s-learning/azure/aks/aks_config`).
 
