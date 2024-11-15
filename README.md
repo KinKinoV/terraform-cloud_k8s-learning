@@ -37,7 +37,7 @@ echo "$(terraform output kube_config)" > ./aks_config
 5. Take values of outputs `kubernetes_cluster_name`, `dns_zone_name`, `resource_group_name` and use them as `aks_name`, `dns_zone_name` and `rg_name` in `values.tfvars` at [azure/kubernetes/](/azure/kubernetes/) directory.
 6. Fill out other required variables and then deploy infrastructure in [azure/kubernetes/](/azure/kubernetes/) directory.
     - After deploying for the first time, go uncomment [ClusterIssuer](/azure/kubernetes/cert-manager.tf#L54) in `/azure/kubernetes/cert-manager.tf` and manifests at [`/azure/kubernetes/test-deployment.tf`](/azure/kubernetes/test-deployment.tf) and deploy once again
-7. Now you should be able to access simple nginx server deployment at `server.<dns_zone_name>` over HTTPS.
+7. Now you should be able to access Istio's demo-app Bookinfo deployment at `bookinfo.<dns_zone_name>` over HTTPS.
 
 ## How to Destroy
 
